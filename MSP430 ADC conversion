@@ -1,0 +1,57 @@
+#include  "msp430g2253.h"
+
+/*
+#include "TI_CC_CC1100.h"
+#include "TI_CC_CC2500.h"
+#include "TI_CC_spi.h"
+#include "CC1100-CC2500.h"
+#include "TI_CC_msp430.h"
+*/
+
+/*
+Created by PJ Banerjee
+ADC conversion and wireless transmission
+*/
+
+void setup()
+{
+  WDTCTL = WDTPW + WDTHOLD;                                  //disable Watchdog timers
+  ADC10CTL0 = ADC10SHT_2 + MSC + ADC10IE+SREF0;            //Initialize registers, clock speed, interrupt, and voltage reference
+  ADC10CTL1 = INCH_3 + CONSEQ1;              //Set pin and constant reading
+  const int analogInPin = A0;  
+  ADC10AE0 = analogInPin;             //Setting analog input pin
+  Serial.begin(9600);
+}
+
+// ADC10 interrupt service routine
+#pragma vector=ADC10_VECTOR
+__interrupt void ADC10_ISR (void)
+{
+	__bic_SR_register_on_exit(CPUOFF);        // Return to active mode }
+}
+void loop()
+{
+  const int analogInPin=A0;  
+  extern char paTable[];
+  extern char paTableLen;
+
+  char txBuffer[4];
+  char rxBuffer[4];
+  
+  unsigned int i = 0;
+  unsigned int digital_value=0;
+ 
+  __enable_interrupt();	
+ 
+  P1SEL |= analogInPin;  	
+  __delay_cycles(1000);
+  ADC10CTL0 |= ENC + ADC10SC+ ADC10ON;               //Enabling analog to digital conversion
+  digital_value = ADC10MEM;	
+  __bis_SR_register(CPUOFF + GIE);
+  Serial.print(digital_value);
+ 	
+  
+ // TI_CC_SW_PxIE = TI_CC_SW1;                // Activate interrupt enables
+
+}
+
