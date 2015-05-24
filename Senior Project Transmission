@@ -1,0 +1,107 @@
+#include  "msp430g2253.h"
+#include "include.h"
+#include <SPI.h>
+#include <AIR430BoostFCC.h>
+
+/*
+Created by PJ Banerjee
+ADC conversion and wireless transmission
+*/
+
+
+// -----------------------------------------------------------------------------
+/**
+ *  Defines, enumerations, and structure definitions
+ */
+#define ADDRESS_LOCAL    0x02
+#define ADDRESS_REMOTE   0x01
+
+
+/**
+ *  sPacket - packet format.
+ */
+ 
+ struct sPacket
+{
+  uint8_t from;           // Local node address that message originated from
+  uint8_t message[2];    // Local node message [MAX. 59 bytes]
+};
+
+// -----------------------------------------------------------------------------
+/**
+ *  Global data
+ */
+
+struct sPacket txPacket;
+
+
+
+extern char paTable[];
+extern char paTableLen;
+char txBuffer[4];
+char rxBuffer[4];
+
+
+
+
+void setup()
+{
+  Radio.begin(ADDRESS_LOCAL, CHANNEL_1, POWER_MAX);
+
+  txPacket.from = ADDRESS_LOCAL;
+  memset(txPacket.message, 0, sizeof(txPacket.message));
+
+  
+  Serial.begin(9600);
+ 
+  WDTCTL = WDTPW + WDTHOLD;                          //Disable Watchdog timer
+  ADC10CTL0 = ADC10SHT_3 + ADC10IE +SREF_0;             //Setting up clock divisions, enable 10 bit ADC, and setting voltage reference to VCC
+  ADC10CTL1 = INCH_1 + CONSEQ_0;        //Setting pin designation and single channel, single conversion
+  P1SEL |= BIT1;
+  P1SEL |= BIT2;
+
+
+  //const int analogInPin = A0;  
+  //ADC10AE0 = analogInPin;  
+  
+}
+
+// ADC10 interrupt service routine
+#pragma vector=ADC10_VECTOR
+__interrupt void ADC10_ISR (void)
+{
+	__bic_SR_register_on_exit(CPUOFF);        // Return to active mode }
+}
+void loop()
+{
+   
+  Serial.println("");	
+  
+  unsigned int digital_value=0;
+  char temp;
+ 
+  __enable_interrupt();	
+ 
+   __delay_cycles(100); 	
+  ADC10CTL0 |= ENC + ADC10SC+ ADC10ON;      //Enable analog to digital conversion 
+  __delay_cycles(100);
+  digital_value = ADC10MEM;	         //Store value of conversion
+ // __bic_SR_register(CPUOFF + GIE);
+  ADC10CTL0 &= ~ENC;          //Disable ADC
+  
+  temp = digital_value >> 8;      //Store 8 bits of 10 bit value into char using bit-shift
+  txPacket.message[0] = temp;   //Storing in transmission packet  
+  temp = digital_value;
+  txPacket.message[1] = temp; 
+
+
+  delay(100);    
+  Radio.transmit(ADDRESS_REMOTE, (unsigned char*)&txPacket, sizeof(txBuffer));  //Transmitting buffer array of conversion values
+  
+  
+  Serial.print("ADC value: "); 
+  Serial.print(digital_value);	
+  
+ // TI_CC_SW_PxIE = TI_CC_SW1;                // Activate interrupt enables
+
+}
