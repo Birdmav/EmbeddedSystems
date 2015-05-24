@@ -1,0 +1,74 @@
+//Include SPI library
+//When Using the SPI library
+//By Default, 11 = MOSI, 12 = MISO, 13 = CLK, 10 = SS
+
+#include <SPI.h>
+#define n 100
+//pushButton = PIN 2
+// pushButton = Control
+// pushButton HIGH = Write Output
+// pushButton LOW = Read Output
+
+
+
+void setup()
+{
+  //Set Pin Direction
+  //Again, the other SPI pins are configured automatically
+  pinMode(SS, OUTPUT);
+  pinMode(SCK, OUTPUT);
+  pinMode(MOSI,OUTPUT);
+ 
+
+  
+  //Initialize SPI
+  //See datasheet for SPI mode
+  //Clock div 128  = 31250 Hz
+  SPI.begin();    
+  SPI.setDataMode(0);
+  SPI.setBitOrder(MSBFIRST);
+  SPI.setClockDivider(SPI_CLOCK_DIV128);  
+}
+
+// Based on the pushButton value, Either Write or Read at the MOSI
+
+void loop()
+{
+   WriteMosi(42,112);       // WriteMosi(42,17) = Gain 2 , Channel 1
+     delay(n);
+     WriteMosi(42,113);       // WriteMosi(42,17) = Gain 2 , Channel 1
+     delay(n);
+      WriteMosi(42,114);       // WriteMosi(42,17) = Gain 2 , Channel 1
+     delay(n);
+      WriteMosi(42,115);       // WriteMosi(42,17) = Gain 2 , Channel 1
+     delay(n);
+  
+
+}
+//   Original (remove pushButton and code above)    
+//   WriteMosi(42,17);
+//   delay(10);
+//   ReadMosi(106,0);
+
+
+// Address determines whether the MOSI will Read or Write
+// Value determines the Gain and Channel Selection
+void WriteMosi( int address, int value)
+{
+  digitalWrite(SS,LOW);    // delay of 1us is used to assure SS is low, before transmitting to MOSI)
+  delay(.001);
+  SPI.transfer(address);
+  SPI.transfer(value);
+  delay(.001);
+  digitalWrite(SS,HIGH);
+}
+void ReadMosi (int address, int value)
+{
+  digitalWrite(SS, LOW);
+  delay(.001);
+  SPI.transfer(address);
+  SPI.transfer(value);
+  delay(.001);
+  digitalWrite(SS,HIGH);
+} 
+  
