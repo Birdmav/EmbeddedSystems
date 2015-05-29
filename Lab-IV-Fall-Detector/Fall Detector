@@ -2,6 +2,11 @@
 PJ Banerjee
 Follow code interfaces HC-05 Bluetooh, Heart-rate sensor, gyroscope, and accelerometer 
 with Arduino Uno
+
+Electronic Lav IV project for elderly to aid in case of falls, seizures, medical emergencies.  Device equipped 
+With accelerometer, gyroscope, heart-rate sensor, HC-05 bluetooth chip, Arduino, and Android 
+ application.   Embedded microcontroller code written in C using SPI protocols, Anrdoid in Java/XML.
+
 */
 
 
