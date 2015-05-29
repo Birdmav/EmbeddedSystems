@@ -1,57 +1,139 @@
-#include  "msp430g2253.h"
-
-/*
-#include "TI_CC_CC1100.h"
-#include "TI_CC_CC2500.h"
-#include "TI_CC_spi.h"
-#include "CC1100-CC2500.h"
-#include "TI_CC_msp430.h"
-*/
+#include  "msp430g2253.h"  //importing MSP-430 library
+#include "include.h"          
+#include <SPI.h>                //importing SPI library
+#include <AIR430BoostFCC.h>   //importing CC1100L booster library 
 
 /*
 Created by PJ Banerjee
 ADC conversion and wireless transmission
 */
 
-void setup()
-{
-  WDTCTL = WDTPW + WDTHOLD;                                  //disable Watchdog timers
-  ADC10CTL0 = ADC10SHT_2 + MSC + ADC10IE+SREF0;            //Initialize registers, clock speed, interrupt, and voltage reference
-  ADC10CTL1 = INCH_3 + CONSEQ1;              //Set pin and constant reading
-  const int analogInPin = A0;  
-  ADC10AE0 = analogInPin;             //Setting analog input pin
-  Serial.begin(9600);
-}
 
+// -----------------------------------------------------------------------------
+/**
+ *  Defines, enumerations, and structure definitions
+ */
+
+#define ADDRESS_LOCAL    0x02  //Defining hex address to store conversion
+#define ADDRESS_REMOTE   0x01  //Defining hex address for wireless transmission
+
+
+/**
+ *  sPacket - packet format.
+ */
+
+ struct sPacket
+{
+  uint8_t from;           // Local node address that message originated from
+  uint8_t message[4];    // Local node message [MAX. 59 bytes]
+};
+
+// -----------------------------------------------------------------------------
+/**
+ *  Global data
+ */
+
+struct sPacket txPacket;  //Creating sPacket structure called txPacket
+
+int k =0;           //Initiliatizing variables
+char j;
+int n;
+int rev=0;
+int digital_value=0;
+
+void setup()
+ {
+  
+   Radio.begin(ADDRESS_LOCAL, CHANNEL_1, POWER_MAX); //Library function to configure wireless transmission
+
+   txPacket.from = ADDRESS_LOCAL;
+   memset(txPacket.message, 0, sizeof(txPacket.message));  //Configuring packet transfer
+  
+  Serial.begin(9600);
+ /*
+  WDTCTL = WDTPW + WDTHOLD;                    for manual configuration of ADC
+  ADC10CTL0 = ADC10SHT_3 + ADC10IE +SREF_0;  //Manually configuring ADC registers without library
+  ADC10CTL1 = INCH_1 + CONSEQ_0;             //functions
+  P1SEL |= BIT1;
+  P1SEL |= BIT2;
+*/ 
+ }
 // ADC10 interrupt service routine
+/*
 #pragma vector=ADC10_VECTOR
 __interrupt void ADC10_ISR (void)
 {
 	__bic_SR_register_on_exit(CPUOFF);        // Return to active mode }
 }
+*/
 void loop()
 {
-  const int analogInPin=A0;  
-  extern char paTable[];
-  extern char paTableLen;
-
-  char txBuffer[4];
-  char rxBuffer[4];
-  
-  unsigned int i = 0;
-  unsigned int digital_value=0;
+   uint8_t temp[4];   //Array of unsigned 8 bit integers
+   
+   k = 0;
+ while(k < 1)
+  {
+   digital_value = analogRead(A4);   //Library function for analog to digital conversion
+          //Storing in integer variable digital_value
+   // print out the value you read:
+   delay(1); // delay in between reads for stability
  
-  __enable_interrupt();	
+   if(digital_value ==0)   //If ADC value is 0
+    {
+     txPacket.message[0] = '0';  //Configures packet message bytes to all 0
+     txPacket.message[1] = '0';  
+     txPacket.message[2] = '0';  
+     txPacket.message[3] = '0';
+     k++;
+    }   
+   else if((digital_value%10)==0)
+    {
+    }
+   else
+    {
+      uint32_t temp = digital_value;  //Storing conversion value into 32 bit unsigned value
+      while(temp != 0)
+       {
+         rev = rev * 10;
+         rev = rev + temp%10;
+         temp = temp/10;
+       }
+     if(rev < 100)
+      rev = rev * 100;
+     if(rev < 1000)
+      rev = rev * 10;
  
-  P1SEL |= analogInPin;  	
-  __delay_cycles(1000);
-  ADC10CTL0 |= ENC + ADC10SC+ ADC10ON;               //Enabling analog to digital conversion
-  digital_value = ADC10MEM;	
-  __bis_SR_register(CPUOFF + GIE);
-  Serial.print(digital_value);
- 	
+    for(int i = 3; rev != 0; rev=rev/10)
+     {
+       txPacket.message[k] = (rev%10)+0x30;
+       i--;
+       k++;
+     }
+    }
+  /*
+        Algorithm above reverses integers in digital value
+        to be stored into message array in sPacket structure
+      so library function can be used to wireless transmit 
+      information in the form of a packet of characters
+   */  
   
+  Radio.transmit(ADDRESS_REMOTE, (unsigned char*)&txPacket, sizeof(txPacket));
+   //Transmits packet of unsigned characters which translates into
+   //value of analog to digital conversion
+  }
+ 
  // TI_CC_SW_PxIE = TI_CC_SW1;                // Activate interrupt enables
+  /*
+  __enable_interrupt();	
+   __delay_cycles(100); 	   Attempt of manual analog to digital configuration
+  ADC10CTL0 |= ENC + ADC10SC+ ADC10ON;  without library functions
+  __delay_cycles(100);
+  digital_value = ADC10MEM;	
+ // __bic_SR_register(CPUOFF + GIE);
+  ADC10CTL0 &= ~ENC;
+  */
 
 }
+
+
 
