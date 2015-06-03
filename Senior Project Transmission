@@ -58,7 +58,7 @@ void setup()
   ADC10CTL0 = ADC10SHT_3 + ADC10IE +SREF_0;             //Setting up clock divisions, enable 10 bit ADC, and setting voltage reference to VCC
   ADC10CTL1 = INCH_1 + CONSEQ_0;        //Setting pin designation and single channel, single conversion
   P1SEL |= BIT1;
-  P1SEL |= BIT2;
+  P1SEL |= BIT2;        //Port configuration
 
 
   //const int analogInPin = A0;  
