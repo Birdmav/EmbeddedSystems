@@ -1,7 +1,7 @@
 
 /*
   For Arduino 
-  
+  (part of the Arduino starter kit tutorial)
   This program uses a servo-motor and a piezo 
   (a sensor that senses vibrations) in a box and a 
   switch and an LED,LEDs indicate if box is locked or unlocked.
