@@ -63,9 +63,9 @@ void loop()
 void WriteMosi( int address, int value)
 {
   digitalWrite(SS,LOW);    // delay of 1us is used to assure SS is low, before transmitting to MOSI)
-  delay(.001);
-  SPI.transfer(address);
-  SPI.transfer(value);
+  delay(.001);                  //Assures Slaveselect is initialized properly
+  SPI.transfer(address);                //Transfer 8-bit value to set read/write 
+  SPI.transfer(value);                //Transfer 8-bit  value to set gain and channel
   delay(.001);
   digitalWrite(SS,HIGH);
 }
