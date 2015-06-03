@@ -2,6 +2,13 @@
 //When Using the SPI library
 //By Default, 11 = MOSI, 12 = MISO, 13 = CLK, 10 = SS
 
+/*
+Programmable Gain Multiplexer PGA-116 from Texas Instruments
+Programming the gain and channel in multi-plexer
+Programmign whether to read/write to PGA-116
+PGA--> Slave, MSP430 --> Master
+*/
+
 #include <SPI.h>
 #define n 100
 //pushButton = PIN 2
