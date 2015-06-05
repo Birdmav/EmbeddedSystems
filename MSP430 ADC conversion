@@ -5,7 +5,7 @@
 
 /*
 Created by PJ Banerjee
-ADC conversion and wireless transmission
+ADC conversion of analog voltage input and wireless transmission of digital values from conversion
 */
 
 
@@ -46,7 +46,7 @@ void setup()
   
    Radio.begin(ADDRESS_LOCAL, CHANNEL_1, POWER_MAX); //Library function to configure wireless transmission
 
-   txPacket.from = ADDRESS_LOCAL;
+   txPacket.from = ADDRESS_LOCAL;              //Setting local address to get transfer packet
    memset(txPacket.message, 0, sizeof(txPacket.message));  //Configuring packet transfer
   
   Serial.begin(9600);
@@ -54,13 +54,13 @@ void setup()
   WDTCTL = WDTPW + WDTHOLD;                    for manual configuration of ADC
   ADC10CTL0 = ADC10SHT_3 + ADC10IE +SREF_0;  //Manually configuring ADC registers without library
   ADC10CTL1 = INCH_1 + CONSEQ_0;             //functions
-  P1SEL |= BIT1;
-  P1SEL |= BIT2;
+  //P1SEL |= BIT1;
+  P1SEL |= BIT2;         //Setting pin direction on port
 */ 
  }
 // ADC10 interrupt service routine
 /*
-#pragma vector=ADC10_VECTOR
+#pragma vector=ADC10_VECTOR                         //Interrupt method
 __interrupt void ADC10_ISR (void)
 {
 	__bic_SR_register_on_exit(CPUOFF);        // Return to active mode }
@@ -80,7 +80,7 @@ void loop()
  
    if(digital_value ==0)   //If ADC value is 0
     {
-     txPacket.message[0] = '0';  //Configures packet message bytes to all 0
+     txPacket.message[0] = '0';  //Configures packet message bytes to all 0 if input is 0
      txPacket.message[1] = '0';  
      txPacket.message[2] = '0';  
      txPacket.message[3] = '0';
@@ -94,7 +94,7 @@ void loop()
       uint32_t temp = digital_value;  //Storing conversion value into 32 bit unsigned value
       while(temp != 0)
        {
-         rev = rev * 10;
+         rev = rev * 10;       //reverses number for packet transmission
          rev = rev + temp%10;
          temp = temp/10;
        }
@@ -105,7 +105,7 @@ void loop()
  
     for(int i = 3; rev != 0; rev=rev/10)
      {
-       txPacket.message[k] = (rev%10)+0x30;
+       txPacket.message[k] = (rev%10)+0x30;         
        i--;
        k++;
      }
@@ -125,12 +125,12 @@ void loop()
  // TI_CC_SW_PxIE = TI_CC_SW1;                // Activate interrupt enables
   /*
   __enable_interrupt();	
-   __delay_cycles(100); 	   Attempt of manual analog to digital configuration
-  ADC10CTL0 |= ENC + ADC10SC+ ADC10ON;  without library functions
+   __delay_cycles(100); 	   //Manual analog to digital configuration
+  ADC10CTL0 |= ENC + ADC10SC+ ADC10ON; // without library functions
   __delay_cycles(100);
   digital_value = ADC10MEM;	
  // __bic_SR_register(CPUOFF + GIE);
-  ADC10CTL0 &= ~ENC;
+  ADC10CTL0 &= ~ENC;   //Disables continuous ADC
   */
 
 }
