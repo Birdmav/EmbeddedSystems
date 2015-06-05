@@ -5,7 +5,7 @@ with Arduino Uno
 
 Electronic Lav IV project for elderly to aid in case of falls, seizures, medical emergencies.  Device equipped 
 With accelerometer, gyroscope, heart-rate sensor, HC-05 bluetooth chip, Arduino, and Android 
- application.   Embedded microcontroller code written in C using SPI protocols, Anrdoid in Java/XML.
+ application.   Embedded microcontroller code written in C using  and I2C protocols, Anrdoid in Java/XML.
 
 */
 
