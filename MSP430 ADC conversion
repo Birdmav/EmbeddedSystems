@@ -51,9 +51,9 @@ void setup()
   
   Serial.begin(9600);
  /*
-  WDTCTL = WDTPW + WDTHOLD;                    for manual configuration of ADC
-  ADC10CTL0 = ADC10SHT_3 + ADC10IE +SREF_0;  //Manually configuring ADC registers without library
-  ADC10CTL1 = INCH_1 + CONSEQ_0;             //functions
+  WDTCTL = WDTPW + WDTHOLD;                    //for manual configuration of ADC, Disable watchdog timer
+  ADC10CTL0 = ADC10SHT_3 + ADC10IE +SREF_0;  //Manually configuring ADC registers without library, clock divisions, 10 bit conversion enable and voltrage reference
+  ADC10CTL1 = INCH_1 + CONSEQ_0;             //functions, pin configuration and single channel single conversion
   //P1SEL |= BIT1;
   P1SEL |= BIT2;         //Setting pin direction on port
 */ 
@@ -126,10 +126,10 @@ void loop()
   /*
   __enable_interrupt();	
    __delay_cycles(100); 	   //Manual analog to digital configuration
-  ADC10CTL0 |= ENC + ADC10SC+ ADC10ON; // without library functions
+  ADC10CTL0 |= ENC + ADC10SC+ ADC10ON; // without library functions, enable ADC 
   __delay_cycles(100);
-  digital_value = ADC10MEM;	
- // __bic_SR_register(CPUOFF + GIE);
+  digital_value = ADC10MEM;           //Store valvue of conversion in variable 
+ // __bic_SR_register(CPUOFF + GIE);            
   ADC10CTL0 &= ~ENC;   //Disables continuous ADC
   */
 
